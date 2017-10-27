@@ -5,6 +5,9 @@ using System;
 
 namespace Twygger.Config
 {
+    /// <summary>
+    /// Base-class for configuration models
+    /// </summary>
     public abstract class TwyggerConfig
     {
         /// <summary>
@@ -67,12 +70,24 @@ namespace Twygger.Config
         }
 
         #region Static functions for use in constructor actions
+        /// <summary>
+        /// Configures a model as an auto-reloadable option (IOptionsSnapshot<typeparamref name="T"/>)
+        /// </summary>
+        /// <param name="services">servicecollection</param>
+        /// <param name="tenantName">name of the tenant (null for none)</param>
+        /// <param name="config">configuration that contains the section for the model</param>
+        /// <param name="sectionName">sectionname for the section that represents the model</param>
         protected static void ConfigureModel<T>(IServiceCollection services, string tenantName, IConfiguration config, string sectionName)
             where T : class, new()
         {
             services.Configure<T>(tenantName ?? Options.DefaultName, config.GetSection(sectionName));
         }
 
+        /// <summary>
+        /// Registers a model for DI
+        /// </summary>
+        /// <typeparam name="T">Type of the model</typeparam>
+        /// <param name="services">IServiceCollection</param>
         protected static void RegisterModel<T>(IServiceCollection services)
             where T: class, new()
         {

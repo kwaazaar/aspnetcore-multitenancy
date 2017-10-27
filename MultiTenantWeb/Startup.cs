@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using Twygger.Config;
 
@@ -14,7 +13,6 @@ namespace MultiTenantWeb
     {
         private readonly IConfiguration Configuration;
         private readonly CancellationTokenSource _cancellationTokenSource;
-        private HashSet<string> _customizedTenants = new HashSet<string>();
 
         public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
@@ -49,6 +47,7 @@ namespace MultiTenantWeb
                 app.UseDeveloperExceptionPage();
             }
 
+            // Required for cancelling the cancellationtoken supplied to AddTwyggerConfigSources
             appLifetime.ApplicationStopping.Register(_cancellationTokenSource.Cancel);
 
             app.UseMvc();
