@@ -3,13 +3,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Twygger.Config;
-using Winton.Extensions.Configuration.Consul;
 
 namespace MultiTenantWeb
 {
@@ -41,9 +38,7 @@ namespace MultiTenantWeb
             services.AddMvc();
 
             // Config DI setup
-            services.AddOptions();
-
-            services.AddTwyggerOptions(Configuration, null, typeof(DbConfig));
+            services.AddTwyggerOptions(Configuration, typeof(DbConfig), typeof(CustomConfig));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

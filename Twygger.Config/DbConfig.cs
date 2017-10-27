@@ -1,14 +1,13 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace Twygger.Config
+﻿namespace Twygger.Config
 {
     public class DbConfig : TwyggerConfig
     {
+        private const string SECTION_NAME = "DbConfig";
+
         public DbConfig()
-            : base("DbConfig",
-                  (services, name, config) => Configure<DbConfig>(services, name, config, "DbConfig"),
-                  (services) => RegisterOptionSnapshot<DbConfig>(services))
+            : base(SECTION_NAME, 
+                  (services, tenantName, config) => ConfigureModel<DbConfig>(services, tenantName, config, SECTION_NAME),
+                  (services) => RegisterModel<DbConfig>(services))
         {
         }
 

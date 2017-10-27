@@ -7,17 +7,23 @@ namespace MultiTenantWeb.Controllers
     public class ValuesController : Controller
     {
         private DbConfig _dbConfig;
+        private CustomConfig _customConfig;
 
-        public ValuesController(DbConfig dbConfig)
+        public ValuesController(DbConfig dbConfig, CustomConfig customConfig)
         {
             _dbConfig = dbConfig;
+            _customConfig = customConfig;
         }
 
         // GET api/values
         [HttpGet]
-        public DbConfig Get()
+        public IActionResult Get()
         {
-            return _dbConfig;
+            return Ok(new
+            {
+                DbConfig = _dbConfig,
+                CustomConfig = _customConfig
+            });
         }
     }
 }
