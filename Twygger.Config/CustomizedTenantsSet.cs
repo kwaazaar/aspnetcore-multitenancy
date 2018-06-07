@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
-namespace Twygger.Config
+namespace Kwaazaar.Config
 {
-    public class CustomizedTenantsSet : ICustomizedTenantsSet
+    internal class CustomizedTenantsSet : ICustomizedTenantsSet
     {
         private HashSet<string> customizedTenants = new HashSet<string>();
 

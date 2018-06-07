@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Twygger.Config;
+using Kwaazaar.Config;
 
 namespace MultiTenantWeb.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
-        private DbConfig _dbConfig;
-        private CustomConfig _customConfig;
+        private readonly DbConfig _dbConfig;
+        private readonly CustomConfig _customConfig;
 
         public ValuesController(DbConfig dbConfig, CustomConfig customConfig)
         {

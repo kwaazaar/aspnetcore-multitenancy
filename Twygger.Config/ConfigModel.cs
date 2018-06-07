@@ -3,12 +3,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 
-namespace Twygger.Config
+namespace Kwaazaar.Config
 {
     /// <summary>
     /// Base-class for configuration models
     /// </summary>
-    public abstract class TwyggerConfig
+    public abstract class ConfigModel
     {
         /// <summary>
         /// Delegate for configuring a model as an Option
@@ -41,15 +41,12 @@ namespace Twygger.Config
         /// <param name="sectionName">SectionName in the configuration, eg: DbConfig</param>
         /// <param name="configureModelDelegate">Delegate that must invoke TwyggerConfig.ConfigureModel&lt;TModel&gt; method</param>
         /// <param name="registerModelDelegate">Delegate that must invoke TwyggerConfig.RegisterModel&lt;TModel&gt; method</param>
-        protected TwyggerConfig(string sectionName, ConfigureModelDelegate configureModelDelegate, RegisterModelDelegate registerModelDelegate)
+        protected ConfigModel(string sectionName, ConfigureModelDelegate configureModelDelegate, RegisterModelDelegate registerModelDelegate)
         {
             if (String.IsNullOrWhiteSpace(sectionName)) throw new ArgumentNullException(nameof(sectionName));
-            if (configureModelDelegate == null) throw new ArgumentNullException(nameof(configureModelDelegate));
-            if (registerModelDelegate == null) throw new ArgumentNullException(nameof(registerModelDelegate));
-
             _sectionName = sectionName;
-            _configureModelDelegate = configureModelDelegate;
-            _registerModelDelegate = registerModelDelegate;
+            _configureModelDelegate = configureModelDelegate ?? throw new ArgumentNullException(nameof(configureModelDelegate));
+            _registerModelDelegate = registerModelDelegate ?? throw new ArgumentNullException(nameof(registerModelDelegate));
         }
 
         /// <summary>
@@ -59,11 +56,28 @@ namespace Twygger.Config
         /// <param name="tenantId">The active tenant, could be empty string</param>
         public virtual void SetTenantId(string tenantId) { }
 
+        /// <summary>
+        /// Validate the model after retrieval
+        /// </summary>
+        public virtual void Validate() { }
+
+        /// <summary>
+        /// Invoke the registerModelDelegate to registers a model for DI. The model is registered as scoped and a custom action retrieves its value using
+        /// an IOptionsSnapshot to enable auto-reloading. After loading, SetTenantId is invoked on the model.
+        /// </summary>
+        /// <typeparam name="T">Type of the model</typeparam>
+        /// <param name="services">IServiceCollection</param>
         internal void RegisterModel(IServiceCollection services)
         {
             _registerModelDelegate(services);
         }
 
+        /// <summary>
+        /// Invoke the configureModelDelegate to configures a model as IOption<typeparamref name="T"/>
+        /// </summary>
+        /// <param name="services">servicecollection</param>
+        /// <param name="tenantName">name of the tenant (null for none)</param>
+        /// <param name="config">configuration that contains the section for the model</param>
         internal void ConfigureModel(IServiceCollection services, string tenantName, IConfiguration config)
         {
             _configureModelDelegate(services, tenantName ?? Options.DefaultName, config);
@@ -71,7 +85,7 @@ namespace Twygger.Config
 
         #region Static functions for use in constructor actions
         /// <summary>
-        /// Configures a model as an auto-reloadable option (IOptionsSnapshot<typeparamref name="T"/>)
+        /// Configures a model as IOption<typeparamref name="T"/>
         /// </summary>
         /// <param name="services">servicecollection</param>
         /// <param name="tenantName">name of the tenant (null for none)</param>
@@ -80,18 +94,19 @@ namespace Twygger.Config
         protected static void ConfigureModel<T>(IServiceCollection services, string tenantName, IConfiguration config, string sectionName)
             where T : class, new()
         {
-            services.Configure<T>(tenantName ?? Options.DefaultName, config.GetSection(sectionName));
+            services.Configure<T>(tenantName ?? Options.DefaultName, config.GetSection(sectionName)); //  ?? typeof(T).GetType().Name
         }
 
         /// <summary>
-        /// Registers a model for DI
+        /// Registers a model for DI. The model is registered as scoped and a custom action retrieves its value using
+        /// an IOptionsSnapshot to enable auto-reloading. After loading, SetTenantId is invoked on the model.
         /// </summary>
         /// <typeparam name="T">Type of the model</typeparam>
         /// <param name="services">IServiceCollection</param>
         protected static void RegisterModel<T>(IServiceCollection services)
             where T: class, new()
         {
-            services.AddScoped<T>(sp =>
+            services.AddScoped<T>(sp => // Scoped lifetime (ASP.Net creates scope for every request)
             {
                 var currentTenantId = sp.GetService<ITenantIdProvider>().GetTenantId();
 
@@ -101,8 +116,11 @@ namespace Twygger.Config
 
                 if (obj != null)
                 {
-                    var tc = obj as TwyggerConfig;
-                    if (tc != null) tc.SetTenantId(currentTenantId);
+                    if (obj is ConfigModel tc)
+                    {
+                        tc.Validate();
+                        tc.SetTenantId(currentTenantId);
+                    }
                 }
                 return obj;
             });

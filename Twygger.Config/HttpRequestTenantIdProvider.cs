@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace Twygger.Config
+namespace Kwaazaar.Config
 {
+    /// <summary>
+    /// Default TenantId provider, based on HTTP-header in http request
+    /// </summary>
     public class HttpRequestTenantIdProvider : ITenantIdProvider
     {
         private readonly string TenantHeaderName;
@@ -24,9 +25,7 @@ namespace Twygger.Config
         public string GetTenantId()
         {
             var ctx = new HttpContextAccessor().HttpContext;
-            return (ctx?.Request != null)
-                ? ctx.Request.Headers.SingleOrDefault(h => h.Key == TenantHeaderName).Value.FirstOrDefault() ?? string.Empty
-                : null;
+            return ctx?.Request?.Headers.SingleOrDefault(h => h.Key == TenantHeaderName).Value.FirstOrDefault() ?? string.Empty;
         }
     }
 }

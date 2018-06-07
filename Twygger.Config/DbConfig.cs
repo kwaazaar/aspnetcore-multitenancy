@@ -1,20 +1,40 @@
-﻿namespace Twygger.Config
+﻿using System;
+
+namespace Kwaazaar.Config
 {
-    public class DbConfig : TwyggerConfig
+    class X
+    {
+        public void Do()
+        {
+
+        }
+    }
+    /// <summary>
+    /// Basic database configuration model, can be used as an example
+    /// </summary>
+    public class DbConfig : ConfigModel
     {
         private const string SECTION_NAME = "DbConfig";
 
-        public DbConfig()
-            : base(SECTION_NAME, 
+        public DbConfig() : base(SECTION_NAME,
                   (services, tenantName, config) => ConfigureModel<DbConfig>(services, tenantName, config, SECTION_NAME),
-                  (services) => RegisterModel<DbConfig>(services))
+                  RegisterModel<DbConfig>)
         {
         }
 
         public override void SetTenantId(string tenantId)
         {
-            Server = Server?.Replace("%tenantid%", tenantId);
-            Database = Database?.Replace("%tenantid%", tenantId);
+            const string tenantPlaceholder = "%tenantid%";
+            Server = Server?.Replace(tenantPlaceholder, tenantId);
+            Database = Database?.Replace(tenantPlaceholder, tenantId);
+            Username = Username?.Replace(tenantPlaceholder, tenantId);
+            Password = Password?.Replace(tenantPlaceholder, tenantId);
+        }
+
+        public override void Validate()
+        {
+            if (Server == null || Database == null || Username == null || Password == null)
+                throw new ArgumentException("DbConfig configuration is not valid");
         }
 
         public string Server { get; set; }

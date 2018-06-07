@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Kwaazaar.Config;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading;
-using Twygger.Config;
 
 namespace MultiTenantWeb
 {
@@ -21,8 +21,7 @@ namespace MultiTenantWeb
             var builder = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile("appsettings.{env}.json", optional: true, reloadOnChange: true)
-                .AddTwyggerConfigSources(_cancellationTokenSource, "ProfileService")
+                .AddJsonFile("appsettings.custom.json", optional: false, reloadOnChange: true)
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
@@ -32,11 +31,11 @@ namespace MultiTenantWeb
         public void ConfigureServices(IServiceCollection services)
         {
             // WebAPI/Mvc
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>(); // Required by HttpRequestTenantIdProvider, which is used to determine the tenantid
             services.AddMvc();
 
             // Config DI setup
-            services.AddTwyggerOptions(Configuration, typeof(DbConfig), typeof(CustomConfig));
+            services.AutoConfigure(Configuration, typeof(DbConfig), typeof(CustomConfig));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

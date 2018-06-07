@@ -3,30 +3,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using Winton.Extensions.Configuration.Consul;
 
-namespace Twygger.Config
+namespace Kwaazaar.Config
 {
     public static class ConfigExtensions
     {
-        /// <summary>
-        /// Adds configsources desired/required for Twygger
-        /// </summary>
-        /// <param name="configBuilder">IConfigurationBuilder</param>
-        /// <param name="cancellationTokenSource">CancellationTokenSource to be used for sources that support cancelling (eg. required for auto-reloading support for Consul)</param>
-        /// <param name="consulAppConfigKey">Consul path to configuration specific for current application, eg: "ProfileService"</param>
-        /// <param name="consulSharedConfigKey">Optional: consul path to shared configuration (default: "shared")</param>
-        /// <param name="consulCustomizedTenantsConfigKey">Optional: consul path to tenant-specific customization (default: "CustomizedTenants")</param>
-        /// <returns>IConfigurationBuilder</returns>
-        public static IConfigurationBuilder AddTwyggerConfigSources(this IConfigurationBuilder configBuilder, CancellationTokenSource cancellationTokenSource,
-            string consulAppConfigKey, string consulSharedConfigKey = "shared", string consulCustomizedTenantsConfigKey = "CustomizedTenants")
-        {
-            return configBuilder.AddConsul(consulSharedConfigKey, cancellationTokenSource.Token, (o) => { o.ReloadOnChange = true; })
-                .AddConsul(consulAppConfigKey, cancellationTokenSource.Token, (o) => { o.ReloadOnChange = true; })
-                .AddConsul(consulCustomizedTenantsConfigKey, cancellationTokenSource.Token, (o) => { o.ReloadOnChange = true; o.Optional = true; });
-        }
-
         /// <summary>
         /// Add Twygger configuration options support (DI-registered, auto-reloading configuration models) with multi-tenancy support
         /// </summary>
@@ -34,9 +15,9 @@ namespace Twygger.Config
         /// <param name="config">IConfiguration to load from</param>
         /// <param name="configModels">Types of configuration models that must be loaded (each required model must be explicitly specified here).</param>
         /// <returns>IServiceCollection</returns>
-        public static IServiceCollection AddTwyggerOptions(this IServiceCollection services, IConfiguration config, params Type[] configModels)
+        public static IServiceCollection AutoConfigure(this IServiceCollection services, IConfiguration config, params Type[] configModels)
         {
-            return AddTwyggerOptions(services, config, tenantCustomizationEnabled: true, tenantIdProvider: null, configModels: configModels);
+            return AutoConfigure(services, config, tenantCustomizationEnabled: true, tenantIdProvider: null, configModels: configModels);
         }
 
         /// <summary>
@@ -47,9 +28,9 @@ namespace Twygger.Config
         /// <param name="tenantCustomizationEnabled">Optional: when enabled this allowes for tenant-specific customizations (other than tenantid-variable replacements, etc), default: enabled</param>
         /// <param name="configModels">Types of configuration models that must be loaded (each required model must be explicitly specified here).</param>
         /// <returns>IServiceCollection</returns>
-        public static IServiceCollection AddTwyggerOptions(this IServiceCollection services, IConfiguration config, bool tenantCustomizationEnabled = true, params Type[] configModels)
+        public static IServiceCollection AutoConfigure(this IServiceCollection services, IConfiguration config, bool tenantCustomizationEnabled = true, params Type[] configModels)
         {
-            return AddTwyggerOptions(services, config, tenantCustomizationEnabled: tenantCustomizationEnabled, tenantIdProvider: null, configModels: configModels);
+            return AutoConfigure(services, config, tenantCustomizationEnabled: tenantCustomizationEnabled, tenantIdProvider: null, configModels: configModels);
         }
 
         /// <summary>
@@ -61,9 +42,9 @@ namespace Twygger.Config
         /// <param name="tenantIdProvider">Optional: specifies the provider that supplies the tenant-id at any required moment (default: HttpRequestTenantIdProvider)</param>
         /// <param name="configModels">Types of configuration models that must be loaded (each required model must be explicitly specified here).</param>
         /// <returns>IServiceCollection</returns>
-        public static IServiceCollection AddTwyggerOptions(this IServiceCollection services, IConfiguration config, bool tenantCustomizationEnabled = true, ITenantIdProvider tenantIdProvider = null, params Type[] configModels)
+        public static IServiceCollection AutoConfigure(this IServiceCollection services, IConfiguration config, bool tenantCustomizationEnabled = true, ITenantIdProvider tenantIdProvider = null, params Type[] configModels)
         {
-            // Add support for AspNetCore's configuration options
+            // Ensure support for AspNetCore's configuration options
             services.AddOptions();
 
             // Inject the tenantid provider
@@ -90,13 +71,14 @@ namespace Twygger.Config
             }
 
             // Configure & register configuration models
-            var modelTypeInstances = new Dictionary<Type, TwyggerConfig>();
+            var modelTypeInstances = new Dictionary<Type, ConfigModel>();
             foreach (var modelType in configModels)
             {
-                if (!modelType.IsSubclassOf(typeof(TwyggerConfig)))
-                    throw new ArgumentException($"Twygger ConfigModel {modelType.Name} must inherit from {nameof(TwyggerConfig)}");
+                if (!modelType.IsSubclassOf(typeof(ConfigModel)))
+                    throw new ArgumentException($"Twygger ConfigModel {modelType.Name} must inherit from {nameof(ConfigModel)}");
 
-                var modelTypeInstance = (TwyggerConfig)Activator.CreateInstance(modelType);
+                // Instantiate the modelType, so that we can call some of its methods to properly set it up
+                var modelTypeInstance = (ConfigModel)Activator.CreateInstance(modelType);
                 modelTypeInstances.Add(modelType, modelTypeInstance);
 
                 // Configure for unnamed queries (for non-customized tenants)
@@ -107,7 +89,7 @@ namespace Twygger.Config
                 {
                     foreach (KeyValuePair<string, IConfigurationSection> tenant in customizedTenantsDictionary)
                     {
-                        var tenantSpecificModelSection = tenant.Value.GetSection(modelTypeInstance.SectionName);
+                        var tenantSpecificModelSection = tenant.Value.GetSection(modelTypeInstance.SectionName); // See if the tenant-specific config contains this section
                         modelTypeInstance.ConfigureModel(services, tenant.Key, tenantSpecificModelSection.Exists() ? tenant.Value : config);
                     }
                 }

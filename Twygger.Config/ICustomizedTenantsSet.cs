@@ -1,6 +1,6 @@
-﻿namespace Twygger.Config
+﻿namespace Kwaazaar.Config
 {
-    public interface ICustomizedTenantsSet
+    internal interface ICustomizedTenantsSet
     {
         void AddTenantId(string tenantId);
         bool ContainsTenantId(string tenantId);

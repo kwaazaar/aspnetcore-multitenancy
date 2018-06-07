@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultiTenantWeb", "MultiTenantWeb\MultiTenantWeb.csproj", "{7C45B97C-3BE5-4977-A9BC-F5821CA0F84F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MultiTenantWeb", "MultiTenantWeb\MultiTenantWeb.csproj", "{7C45B97C-3BE5-4977-A9BC-F5821CA0F84F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Twygger.Config", "Twygger.Config\Twygger.Config.csproj", "{E6547B02-94BF-4D10-87C7-D241388EF278}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kwaazaar.Config", "Twygger.Config\Kwaazaar.Config.csproj", "{E6547B02-94BF-4D10-87C7-D241388EF278}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
