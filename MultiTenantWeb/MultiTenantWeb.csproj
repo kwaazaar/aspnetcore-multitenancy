@@ -41,7 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Twygger.Config\Kwaazaar.Config.csproj" />
+    <ProjectReference Include="..\Kwaazaar.Config\Kwaazaar.Config.csproj" />
   </ItemGroup>
 
   <ItemGroup>
