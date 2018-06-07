@@ -2,13 +2,6 @@
 
 namespace Kwaazaar.Config
 {
-    class X
-    {
-        public void Do()
-        {
-
-        }
-    }
     /// <summary>
     /// Basic database configuration model, can be used as an example
     /// </summary>
