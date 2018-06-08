@@ -30,8 +30,11 @@ namespace MultiTenantWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // WebAPI/Mvc
+            // Inject the tenantid provider
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>(); // Required by HttpRequestTenantIdProvider, which is used to determine the tenantid
+            services.AddSingleton(new HttpRequestTenantIdProvider());
+
+            // WebAPI/Mvc
             services.AddMvc();
 
             // Config DI setup
