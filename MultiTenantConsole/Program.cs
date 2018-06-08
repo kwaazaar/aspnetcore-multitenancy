@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,32 +19,10 @@ namespace MultiTenantConsole
             ConfigureServices(serviceCollection);
             ServiceProvider = serviceCollection.BuildServiceProvider();
 
-            var tasks = new Task[] { ReadDbConfig("t1"), ReadDbConfig("t2"), ReadDbConfig("t3"), ReadDbConfig("t4") };
-            Task.WaitAll(tasks);
-
-            /*
-            var tenantIdProvider = (ContextTenantProvider)ServiceProvider.GetService<ITenantIdProvider>();
-
-            var tenantId = "t1";
-            tenantIdProvider.SetTenantId(tenantId);
-            Console.WriteLine($"TenantId: {ServiceProvider.GetService<ITenantIdProvider>().GetTenantId()}");
-            using (var spScope = ServiceProvider.CreateScope())
-            {
-                Console.WriteLine($"TenantId-In-Scope: {ServiceProvider.GetService<ITenantIdProvider>().GetTenantId()}");
-                var dbConfig = spScope.ServiceProvider.GetService<DbConfig>();
-                Console.WriteLine($"Server: {dbConfig.Server}, Database: {dbConfig.Database}, Username: {dbConfig.Username}, Password: {dbConfig.Password}");
-            }
-
-            tenantId = "t2";
-            tenantIdProvider.SetTenantId(tenantId);
-            Console.WriteLine($"TenantId: {ServiceProvider.GetService<ITenantIdProvider>().GetTenantId()}");
-            using (var spScope = ServiceProvider.CreateScope())
-            {
-                Console.WriteLine($"TenantId-In-Scope: {ServiceProvider.GetService<ITenantIdProvider>().GetTenantId()}");
-                var dbConfig = spScope.ServiceProvider.GetService<DbConfig>();
-                Console.WriteLine($"Server: {dbConfig.Server}, Database: {dbConfig.Database}, Username: {dbConfig.Username}, Password: {dbConfig.Password}");
-            }
-            */
+            var tasks = new List<Task>();
+            for (int i = 1; i < 100; i++)
+                tasks.Add(ReadDbConfig("t" + i.ToString()));
+            Task.WaitAll(tasks.ToArray());
         }
 
         private static async Task ReadDbConfig(string tenantId)
@@ -61,6 +40,7 @@ namespace MultiTenantConsole
                 await Task.Delay(DateTime.UtcNow.Millisecond);
                 var dbConfig = spScope.ServiceProvider.GetService<DbConfig>();
                 Console.WriteLine($"({tenantId}-{Thread.CurrentThread.ManagedThreadId}) - Server: {dbConfig.Server}, Database: {dbConfig.Database}, Username: {dbConfig.Username}, Password: {dbConfig.Password}");
+                if (dbConfig.Username != "Username-" + tenantId) throw new Exception("Mismatch!");
             }
         }
 
