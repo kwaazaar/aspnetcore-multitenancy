@@ -32,7 +32,7 @@ namespace MultiTenantWeb
         {
             // Inject the tenantid provider
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>(); // Required by HttpRequestTenantIdProvider, which is used to determine the tenantid
-            services.AddSingleton(new HttpRequestTenantIdProvider());
+            services.AddSingleton(typeof(ITenantIdProvider), new HttpRequestTenantIdProvider());
 
             // WebAPI/Mvc
             services.AddMvc();
