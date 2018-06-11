@@ -38,7 +38,9 @@ namespace MultiTenantWeb
             services.AddMvc();
 
             // Config DI setup
-            services.AutoConfigure(Configuration, typeof(DbConfig), typeof(CustomConfig));
+            services.EnableMultiTenancySupport(Configuration);
+            services.AutoConfigure<DbConfig>(Configuration);
+            services.AutoConfigure<CustomConfig>(Configuration, "CustomConfiguration");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

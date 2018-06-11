@@ -57,7 +57,9 @@ namespace MultiTenantConsole
             serviceCollection.AddSingleton(typeof(ITenantIdProvider), typeof(ContextTenantProvider));
 
             // Configuration injection
-            serviceCollection.AutoConfigure(config, typeof(DbConfig));
+            serviceCollection
+                .EnableMultiTenancySupport(config)
+                .AutoConfigure<DbConfig>(config);
         }
     }
 }
