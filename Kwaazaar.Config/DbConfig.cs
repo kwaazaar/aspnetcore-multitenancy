@@ -7,14 +7,6 @@ namespace Kwaazaar.Config
     /// </summary>
     public class DbConfig : ConfigModel
     {
-        private const string SECTION_NAME = "DbConfig";
-
-        public DbConfig() : base(SECTION_NAME,
-                  (services, tenantName, config) => ConfigureModel<DbConfig>(services, tenantName, config, SECTION_NAME),
-                  RegisterModel<DbConfig>)
-        {
-        }
-
         public override void SetTenantId(string tenantId)
         {
             const string tenantPlaceholder = "%tenantid%";

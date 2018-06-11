@@ -37,8 +37,10 @@ namespace MultiTenantWeb
             // WebAPI/Mvc
             services.AddMvc();
 
-            // Config DI setup
-            services.AutoConfigure(Configuration, typeof(DbConfig), typeof(CustomConfig));
+            // Configuration injection
+            services.EnableMultiTenancySupport(Configuration)
+                .AutoConfigure<DbConfig>(Configuration)
+                .AutoConfigure<CustomConfig>(Configuration, "CustomConfiguration");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,7 +51,7 @@ namespace MultiTenantWeb
                 app.UseDeveloperExceptionPage();
             }
 
-            // Required for cancelling the cancellationtoken supplied to AddTwyggerConfigSources
+            // Required for cancelling the cancellationtoken supplied to possible configsources
             appLifetime.ApplicationStopping.Register(_cancellationTokenSource.Cancel);
 
             app.UseMvc();

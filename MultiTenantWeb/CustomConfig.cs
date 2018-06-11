@@ -4,15 +4,6 @@ namespace MultiTenantWeb
 {
     public class CustomConfig : ConfigModel
     {
-        private const string SECTION_NAME = "CustomConfig";
-
-        public CustomConfig()
-            : base(SECTION_NAME,
-                  (services, tenantName, config) => ConfigureModel<CustomConfig>(services, tenantName, config, SECTION_NAME),
-                  RegisterModel<CustomConfig>)
-        {
-        }
-
         public string CustomProp { get; set; }
         public string CustomProp2 { get; set; }
 
