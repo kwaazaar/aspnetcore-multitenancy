@@ -17,7 +17,9 @@ namespace MultiTenantConsole
         {
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
-            ServiceProvider = serviceCollection.BuildServiceProvider();
+            ServiceProvider = serviceCollection.BuildServiceProvider(true); // Don't allow DI resolve without scope
+
+            var dbConfig = ServiceProvider.GetService<DbConfig>();
 
             var tasks = new List<Task>();
             for (int i = 1; i < 100; i++)

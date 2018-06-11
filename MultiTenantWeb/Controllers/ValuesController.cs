@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Kwaazaar.Config;
+using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace MultiTenantWeb.Controllers
 {
@@ -9,7 +11,7 @@ namespace MultiTenantWeb.Controllers
         private readonly DbConfig _dbConfig;
         private readonly CustomConfig _customConfig;
 
-        public ValuesController(DbConfig dbConfig, CustomConfig customConfig)
+        public ValuesController(DbConfig dbConfig, CustomConfig customConfig, IServiceProvider sp)
         {
             _dbConfig = dbConfig;
             _customConfig = customConfig;
