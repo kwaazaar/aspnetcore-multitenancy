@@ -42,9 +42,8 @@ namespace Kwaazaar.Config
             return services;
         }
 
-
         /// <summary>
-        /// Add Twygger configuration options support (DI-registered, auto-reloading configuration models) with multi-tenancy support
+        /// Add configuration options support (DI-registered, auto-reloading configuration models) with multi-tenancy support
         /// </summary>
         /// <param name="services">IServiceCollection</param>
         /// <param name="config">IConfiguration to load from</param>

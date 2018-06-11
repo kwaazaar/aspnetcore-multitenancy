@@ -51,7 +51,7 @@ namespace MultiTenantWeb
                 app.UseDeveloperExceptionPage();
             }
 
-            // Required for cancelling the cancellationtoken supplied to AddTwyggerConfigSources
+            // Required for cancelling the cancellationtoken supplied to possible configsources
             appLifetime.ApplicationStopping.Register(_cancellationTokenSource.Cancel);
 
             app.UseMvc();
